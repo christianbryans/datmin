@@ -2,8 +2,6 @@
 Analisis Data Lagu Spotify 2024
 ==============================
 
-[PLO01 - CLO05] Business Understanding
--------------------------------------
 Permasalahan:
 - Perlu memahami pola dan karakteristik lagu-lagu yang populer di Spotify
 - Memprediksi apakah sebuah lagu berpotensi masuk Top 100 berdasarkan fitur-fiturnya
@@ -13,7 +11,6 @@ Tujuan:
 2. Memprediksi potensi lagu masuk Top 100 (klasifikasi)
 3. Mengidentifikasi faktor-faktor yang mempengaruhi popularitas lagu
 
-[PLO02 - CLO02] Data Preparation
 -------------------------------
 Tahapan yang dilakukan:
 1. Data Cleaning: menghapus koma, mengisi nilai kosong
