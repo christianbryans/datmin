@@ -81,7 +81,7 @@ plt.figure(figsize=(15, 10))
 for i, col in enumerate(numeric_columns, 1):
     plt.subplot(3, 4, i)
     sns.histplot(data=spotify_df, x=col, bins=30)
-    plt.title(f'Distribusi {col}')
+    plt.title(f'Distribution of {col}')
 plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'feature_distributions.png'))
 plt.close()
@@ -90,7 +90,7 @@ plt.close()
 plt.figure(figsize=(12, 8))
 correlation_matrix = spotify_df[numeric_columns].corr()
 sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', center=0)
-plt.title('Korelasi Antar Fitur')
+plt.title('Feature Correlations')
 plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'correlation_matrix.png'))
 plt.close()
@@ -143,7 +143,7 @@ plt.subplot(1, 2, 2)
 plt.plot(K, silhouette_scores, 'rx-')
 plt.xlabel('k')
 plt.ylabel('Silhouette Score')
-plt.title('Silhouette Score Method')
+plt.title('Silhouette Analysis')
 plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'elbow_silhouette.png'))
 plt.close()
@@ -185,7 +185,7 @@ plt.figure(figsize=(8,6))
 scatter = plt.scatter(X_pca[:,0], X_pca[:,1], c=spotify_df['Cluster'], cmap='Set1', alpha=0.6)
 plt.xlabel('PCA Component 1')
 plt.ylabel('PCA Component 2')
-plt.title('Visualisasi Cluster KMeans (PCA 2D, K=2)')
+plt.title('Cluster Visualization')
 plt.legend(*scatter.legend_elements(), title="Cluster")
 plt.grid(True)
 plt.tight_layout()
@@ -197,7 +197,7 @@ plt.figure(figsize=(15, 10))
 for i, feature in enumerate(features_for_clustering, 1):
     plt.subplot(2, 2, i)
     sns.boxplot(x='Cluster', y=feature, data=spotify_df)
-    plt.title(f'Distribusi {feature} per Cluster')
+    plt.title(f'{feature} by Cluster')
 plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'cluster_characteristics.png'))
 plt.close()
@@ -254,7 +254,7 @@ plt.plot(fpr, tpr, label=f'ROC curve (AUC = {roc_auc:.2f})')
 plt.plot([0, 1], [0, 1], 'k--')
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
-plt.title('ROC Curve - Logistic Regression')
+plt.title('ROC Curve')
 plt.legend()
 plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'roc_curve.png'))
@@ -265,34 +265,34 @@ plt.close()
 # =============================================
 
 def create_dashboard():
-    st.title('Analisis Data Lagu Spotify 2024')
+    st.title('Spotify Data Analysis 2024')
     
     # Sidebar
-    st.sidebar.header('Navigasi')
-    page = st.sidebar.selectbox('Pilih Halaman', ['Overview', 'Clustering', 'Klasifikasi'])
+    st.sidebar.header('Navigation')
+    page = st.sidebar.selectbox('Select Page', ['Overview', 'Clustering', 'Classification'])
     
     if page == 'Overview':
-        st.header('Overview Dataset')
+        st.header('Data Overview')
         
         # Statistik dasar
         st.subheader('Statistik Deskriptif')
         st.write(spotify_df.describe())
         
         # Distribusi fitur
-        st.subheader('Distribusi Fitur')
-        feature = st.selectbox('Pilih Fitur', numeric_columns)
-        fig = px.histogram(spotify_df, x=feature, title=f'Distribusi {feature}')
+        st.subheader('Feature Distribution')
+        feature = st.selectbox('Select Feature', numeric_columns)
+        fig = px.histogram(spotify_df, x=feature, title=f'Distribution of {feature}')
         st.plotly_chart(fig)
         
         # Korelasi antar fitur
-        st.subheader('Korelasi Antar Fitur')
+        st.subheader('Feature Correlations')
         fig = px.imshow(correlation_matrix, 
-                       labels=dict(color="Korelasi"),
-                       title='Korelasi Antar Fitur')
+                       labels=dict(color="Correlation"),
+                       title='Feature Correlations')
         st.plotly_chart(fig)
         
     elif page == 'Clustering':
-        st.header('Analisis Clustering dengan K-Means')
+        st.header('Cluster Analysis')
         
         # Penjelasan metode
         st.write("""
@@ -306,16 +306,16 @@ def create_dashboard():
         """)
         
         # Visualisasi cluster
-        st.subheader('Visualisasi Cluster')
+        st.subheader('Cluster Visualization')
         fig = px.scatter(
             x=X_pca[:, 0], y=X_pca[:, 1],
             color=spotify_df['Cluster_Name'],
-            title='Visualisasi Cluster KMeans'
+            title='Cluster Distribution'
         )
         st.plotly_chart(fig)
         
         # Karakteristik cluster
-        st.subheader('Karakteristik Cluster')
+        st.subheader('Cluster Statistics')
         
         # Menampilkan statistik cluster
         st.write("Statistik per Cluster:")
@@ -340,10 +340,10 @@ def create_dashboard():
         """)
         
         # Visualisasi karakteristik
-        st.subheader('Distribusi Fitur per Cluster')
+        st.subheader('Feature Distribution by Cluster')
         for feature in features_for_clustering:
             fig = px.box(spotify_df, x='Cluster_Name', y=feature,
-                        title=f'Distribusi {feature} per Cluster')
+                        title=f'{feature} by Cluster')
             st.plotly_chart(fig)
         
         # Interpretasi cluster
@@ -363,7 +363,7 @@ def create_dashboard():
         """)
         
     else:  # Klasifikasi
-        st.header('Hasil Klasifikasi dengan Logistic Regression')
+        st.header('Classification Results')
         
         # Penjelasan model
         st.write("""
@@ -371,21 +371,21 @@ def create_dashboard():
         """)
         
         # Hasil evaluasi
-        st.subheader('Hasil Evaluasi Model')
-        st.write(f"Akurasi Model: {evaluation_results['Accuracy']:.2%}")
+        st.subheader('Model Performance')
+        st.write(f"Accuracy: {evaluation_results['Accuracy']:.2%}")
         
         # Classification Report
         st.subheader('Classification Report')
         st.text(evaluation_results['Classification Report'])
         
         # Feature Importance
-        st.subheader('Pentingnya Fitur')
+        st.subheader('Feature Importance')
         importance_df = pd.DataFrame({
-            'Fitur': features_for_classification,
-            'Koefisien': evaluation_results['Feature Importance'].values()
+            'Feature': features_for_classification,
+            'Coefficient': evaluation_results['Feature Importance'].values()
         })
-        fig = px.bar(importance_df, x='Fitur', y='Koefisien',
-                    title='Pentingnya Fitur dalam Model')
+        fig = px.bar(importance_df, x='Feature', y='Coefficient',
+                    title='Feature Importance')
         st.plotly_chart(fig)
         
         # ROC Curve
