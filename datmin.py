@@ -129,6 +129,25 @@ def create_dashboard():
     elif page == "Clustering Analysis":
         st.header("Analisis Clustering")
         
+        # Penjelasan Clustering
+        st.markdown("""
+        ### Apa itu Clustering?
+        Clustering adalah teknik untuk mengelompokkan lagu-lagu yang memiliki karakteristik serupa. 
+        Dalam analisis ini, kita menggunakan K-Means Clustering untuk membagi lagu menjadi 2 kelompok:
+        
+        #### Fitur yang Digunakan:
+        - **Track Score**: Skor keseluruhan lagu
+        - **Spotify Streams**: Jumlah streaming di Spotify
+        - **Spotify Playlist Count**: Jumlah playlist yang memuat lagu
+        - **Spotify Playlist Reach**: Jangkauan playlist yang memuat lagu
+        
+        #### Hasil Pengelompokan:
+        - **Cluster 0**: Lagu dengan performa sedang
+        - **Cluster 1**: Lagu dengan performa tinggi
+        
+        Visualisasi di bawah ini menunjukkan bagaimana lagu-lagu dikelompokkan berdasarkan karakteristiknya.
+        """)
+        
         features_for_clustering = ['Track Score', 'Spotify Streams', 'Spotify Playlist Count', 'Spotify Playlist Reach']
         spotify_df, kmeans, scaler = perform_clustering(spotify_df, features_for_clustering)
         
@@ -141,11 +160,53 @@ def create_dashboard():
         
         fig = px.scatter(x=X_pca[:,0], y=X_pca[:,1],
                         color=spotify_df['Cluster'],
-                        title='Cluster Visualization')
+                        title='Visualisasi Pengelompokan Lagu')
         st.plotly_chart(fig)
+        
+        # Menampilkan statistik cluster
+        st.subheader("Statistik per Cluster")
+        cluster_stats = spotify_df.groupby('Cluster')[features_for_clustering].mean()
+        st.dataframe(cluster_stats)
+        
+        # Interpretasi cluster
+        st.markdown("""
+        ### Interpretasi Hasil Clustering
+        
+        #### Cluster 0 (Performa Sedang):
+        - Memiliki nilai fitur yang lebih rendah
+        - Biasanya lagu-lagu dengan popularitas menengah
+        - Memiliki jumlah streaming dan playlist yang lebih sedikit
+        
+        #### Cluster 1 (Performa Tinggi):
+        - Memiliki nilai fitur yang lebih tinggi
+        - Biasanya lagu-lagu yang sangat populer
+        - Memiliki jumlah streaming dan playlist yang lebih banyak
+        
+        ### Manfaat Analisis Clustering:
+        1. **Pemahaman Pasar**: Membantu memahami segmentasi lagu di Spotify
+        2. **Strategi Marketing**: Membantu dalam pengambilan keputusan marketing
+        3. **Analisis Performa**: Memudahkan analisis performa lagu
+        """)
         
     else:  # Classification Analysis
         st.header("Analisis Klasifikasi")
+        
+        # Penjelasan Klasifikasi
+        st.markdown("""
+        ### Apa itu Klasifikasi?
+        Klasifikasi adalah teknik untuk memprediksi apakah sebuah lagu berpotensi masuk Top 100 
+        berdasarkan karakteristiknya. Dalam analisis ini, kita menggunakan Logistic Regression.
+        
+        #### Fitur yang Digunakan:
+        - **Track Score**: Skor keseluruhan lagu
+        - **Spotify Streams**: Jumlah streaming di Spotify
+        - **Spotify Playlist Count**: Jumlah playlist yang memuat lagu
+        - **Spotify Playlist Reach**: Jangkauan playlist yang memuat lagu
+        
+        #### Target:
+        - **Top 100**: Lagu yang masuk dalam 100 lagu teratas
+        - **Non-Top 100**: Lagu yang tidak masuk dalam 100 lagu teratas
+        """)
         
         features_for_classification = ['Track Score', 'Spotify Streams', 'Spotify Playlist Count', 'Spotify Playlist Reach']
         model, scaler, X_test, y_test = train_classification_model(spotify_df, features_for_classification)
@@ -155,6 +216,10 @@ def create_dashboard():
         y_pred = model.predict(X_test)
         y_prob = model.predict_proba(X_test)[:, 1]
         
+        # Menampilkan akurasi
+        accuracy = accuracy_score(y_test, y_pred)
+        st.metric("Akurasi Model", f"{accuracy:.2%}")
+        
         # ROC Curve
         fpr, tpr, _ = roc_curve(y_test, y_prob)
         roc_auc = auc(fpr, tpr)
@@ -162,20 +227,42 @@ def create_dashboard():
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=fpr, y=tpr, name=f'ROC curve (AUC = {roc_auc:.2f})'))
         fig.add_trace(go.Scatter(x=[0, 1], y=[0, 1], name='Random', line=dict(dash='dash')))
-        fig.update_layout(title='ROC Curve',
+        fig.update_layout(title='Kurva ROC',
                          xaxis_title='False Positive Rate',
                          yaxis_title='True Positive Rate')
         st.plotly_chart(fig)
         
         # Feature importance
-        st.subheader("Feature Importance")
+        st.subheader("Pentingnya Fitur")
         importance_df = pd.DataFrame({
             'Feature': features_for_classification,
             'Importance': model.coef_[0]
         })
         fig = px.bar(importance_df, x='Feature', y='Importance',
-                    title='Feature Importance')
+                    title='Pentingnya Fitur dalam Prediksi')
         st.plotly_chart(fig)
+        
+        # Interpretasi model
+        st.markdown("""
+        ### Interpretasi Hasil Klasifikasi
+        
+        #### Akurasi Model:
+        - Menunjukkan seberapa baik model memprediksi lagu Top 100
+        - Semakin tinggi akurasi, semakin baik model dalam memprediksi
+        
+        #### Pentingnya Fitur:
+        - **Nilai Positif**: Fitur yang meningkatkan kemungkinan lagu masuk Top 100
+        - **Nilai Negatif**: Fitur yang menurunkan kemungkinan lagu masuk Top 100
+        
+        #### Kurva ROC:
+        - Menunjukkan kemampuan model dalam membedakan lagu Top 100 dan Non-Top 100
+        - Semakin tinggi AUC (Area Under Curve), semakin baik model dalam membedakan
+        
+        ### Manfaat Analisis Klasifikasi:
+        1. **Prediksi Popularitas**: Membantu memprediksi potensi lagu masuk Top 100
+        2. **Pengambilan Keputusan**: Membantu dalam pengambilan keputusan bisnis
+        3. **Optimasi Strategi**: Membantu mengoptimalkan strategi marketing
+        """)
 
 if __name__ == "__main__":
     create_dashboard()
